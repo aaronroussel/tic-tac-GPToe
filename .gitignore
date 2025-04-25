@@ -1,0 +1,22 @@
+
+# ignore maven target folders
+/APIServer/target/
+/APIServer/.idea/
+/APIServer/.classpath
+/APIServer/.project
+/APIServer/.settings/
+/APIServer/.mvn/
+
+# ignore node_modules and Vite build output
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.vite/
+
+# ignore common OS files
+.DS_Store
+Thumbs.db
+
+# env files
+/frontend/.env
+/frontend/.env.local
+/APIServer/.env
