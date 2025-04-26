@@ -19,4 +19,4 @@ Thumbs.db
 # env files
 /frontend/.env
 /frontend/.env.local
-/APIServer/.env
+/APIServer/*.env

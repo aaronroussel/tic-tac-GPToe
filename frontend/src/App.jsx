@@ -1,5 +1,5 @@
 import "./App.css"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function Square({value, onSquareClick}) {
   return <button className="square" onClick={onSquareClick}>{value}</button>;
@@ -9,18 +9,23 @@ function Board() {
   const [xIsNext, setXIsNext] = useState(true);
   const [squares, setSquares] = useState(Array(9).fill(null));
   
-  function handleClick(i) {
+  async function handleClick(i) {
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
     const nextSquares = squares.slice();
     if (xIsNext) {
       nextSquares[i] = "X";
-    } else {
-      nextSquares[i] = "O";
+      setSquares(nextSquares);
+      setXIsNext(!xIsNext);
     }
-    setSquares(nextSquares);
-    setXIsNext(!xIsNext);
+    if (!xIsNext) {
+      let index = await getLlmResponse(nextSquares.slice());
+      nextSquares[index] = "O";
+      setSquares(nextSquares);
+      setXIsNext(!xIsNext);
+    }
+    
   } 
 
   const winner = calculateWinner(squares);
@@ -28,7 +33,7 @@ function Board() {
   if (winner) {
     status = "Winner: " + winner;
   } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
+    status = "Next player: " + (xIsNext ? "You" : "ChatGPT");
   }
 
   return (
@@ -52,7 +57,7 @@ function Board() {
         </div>
       </div>
     </div>
-  );
+  ) 
 }
 
 export default function BoardContainer() {
@@ -82,6 +87,23 @@ function calculateWinner(squares) {
     }
   }
   return null;
+}
+
+async function getLlmResponse(board) {
+  const response = await fetch('http://localhost:8080/api/llmresponse', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(board),
+  });
+
+  if (!response.ok) {
+    throw new Error('HTTP error! status: ${response.status}');
+  }
+
+  const index = await response.json();
+  return index;
 }
 
 
