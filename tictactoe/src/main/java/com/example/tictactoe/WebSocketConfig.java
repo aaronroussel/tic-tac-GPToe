@@ -1,25 +1,20 @@
 package com.example.tictactoe;
 
+import com.example.tictactoe.controller.WebSocketGameController;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
+  private final WebSocketGameController webSocketGameController; 
 
-  @Override
-  public void configureMessageBroker(MessageBrokerRegistry config) {
-    config.enableSimpleBroker("/game-state");
-    config.setApplicationDestinationPrefixes("/app");
+  public WebSocketConfig(WebSocketGameController webSocketGameController) {
+    this.webSocketGameController = webSocketGameController;
   }
 
   @Override
-  public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/gs-guide-websocket");
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(webSocketGameController, "/game").setAllowedOrigins("*");
   }
-
 }
