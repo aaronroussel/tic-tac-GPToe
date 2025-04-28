@@ -1,43 +1,34 @@
 package com.example.tictactoe;
 
-import java.lang.reflect.Array;
+import java.util.UUID;
 
 public class GameState {
-  private int[] board;
-  private int gameId;
-  private String[] players;
+    private String gameId;
+    private Player player1;
+    private Player player2;
+    private char[][] board; 
 
-  /*
-   * players[0] == "X" on game board
-   * players[1] == "O" on game board
-   */
-
-  GameState(String player1, String player2) {
-    int[] newBoard = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
-    board = newBoard;
-    gameId = 1;
-    String[] newPlayers = {player1, player2};
-    players = newPlayers;
-  }
-
-  private void updateBoard(int index, String player) {
-    if (player == players[0]) {
-      board[index] = 1;
-    } else {
-      board[index] = -1;
+    public GameState(Player player1, Player player2) {
+        this.gameId = UUID.randomUUID().toString();
+        this.player1 = player1;
+        this.player2 = player2;
+        this.board = new char[3][3];  
     }
-  }
 
-  public int[] getState() {
-    return board;
-  }
+    public String getGameId() {
+        return gameId;
+    }
 
-  public String[] getPlayers() {
-    return players;
-  }
+    public Player getPlayer1() {
+        return player1;
+    }
 
-  public int getGameId() {
-    return gameId;
-  }
+    public Player getPlayer2() {
+        return player2;
+    }
 
+    public char[][] getBoard() {
+        return board;
+    }
 }
+
