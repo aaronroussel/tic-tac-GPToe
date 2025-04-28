@@ -1,19 +1,15 @@
-package com.aaron.APIServer;
+package com.example.tictactoe;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
-import com.openai.core.ClientOptions;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.ChatModel;
-import io.github.cdimascio.dotenv.Dotenv;
 
 public class OpenAIConnection {
   private static final OpenAIClient client;
 
   static {
-    Dotenv dotenv = Dotenv.configure().ignoreIfMissing().filename(".env").directory("/").load();
-
     String apiKey = "";
     String baseUrl = "";
     String orgId = "";

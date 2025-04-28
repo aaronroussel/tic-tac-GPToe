@@ -1,10 +1,10 @@
-package com.aaron.APIServer;
+package com.example.tictactoe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiServerApplicationTests {
+class TictactoeApplicationTests {
 
 	@Test
 	void contextLoads() {

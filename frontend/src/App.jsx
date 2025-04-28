@@ -1,5 +1,5 @@
 import "./App.css"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 function Square({value, onSquareClick}) {
   return <button className="square" onClick={onSquareClick}>{value}</button>;
@@ -63,7 +63,6 @@ function Board() {
 export default function BoardContainer() {
   return (
     <>
-      <h1> Hello World! </h1>
       <Board />
     </>
   );
