@@ -1,39 +1,68 @@
 import "./App.css"
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function Square({value, onSquareClick}) {
   return <button className="square" onClick={onSquareClick}>{value}</button>;
 }
 
 function Board() {
-  const [xIsNext, setXIsNext] = useState(true);
   const [squares, setSquares] = useState(Array(9).fill(null));
+  const [status, setStatus] = useState("");
+  const [currentGameId, setCurrentGameId] = useState(null);
+  const [currentPlayerId, setCurrentPlayerId] = useState(null);
+
+  const socketRef = useRef(null);
+
+  useEffect( () => {
+    const socket = new WebSocket("ws://localhost:8080/game");
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log('Websocket connected to localhost:8080/game');
+    };
+
+    socket.onmessage = (event) => {
+      const gameState = JSON.parse(event.data);
+
+      if (gameState.error) {
+        alert(gameState.error);
+      } else {
+        console.log(gameState);
+        setSquares(gameState.board.flat());
+        setStatus(gameState.currentTurnPlayerId === currentPlayerId ? "Your turn!" : "Opponent's turn.");
+        setCurrentGameId(gameState.gameId);
+        setCurrentPlayerId(gameState.currentPlayerId);
+      }
+    };
+
+    socket.onclose = () => {
+      console.log('Websocket diconnected');
+    }
+
+    return () => socket.close();
+    
+  }, [currentPlayerId]);
   
-  async function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
+  function sendMove(gameId, playerId, row, col) {
+    const move = {
+      gameId,
+      playerId,
+      row,
+      col,
+    };
+    socketRef.current.sned(JSON.stringify(move));
+  }
+
+  function handleClick(squareIndex) {
+    if (!currentGameId || !currentPlayerId) {
+      alert("Game hasn't started yet or player ID is invalid!");
       return;
     }
-    const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = "X";
-      setSquares(nextSquares);
-      setXIsNext(!xIsNext);
-    }
-    if (!xIsNext) {
-      let index = await getLlmResponse(nextSquares.slice());
-      nextSquares[index] = "O";
-      setSquares(nextSquares);
-      setXIsNext(!xIsNext);
-    }
-    
-  } 
 
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = "Winner: " + winner;
-  } else {
-    status = "Next player: " + (xIsNext ? "You" : "ChatGPT");
+    const row = Math.floow(squareIndex / 3);
+    const col = squareIndex % 3;
+
+    sendMove(currentGameId, currentPlayerId, row, col);
   }
 
   return (
@@ -67,42 +96,4 @@ export default function BoardContainer() {
     </>
   );
 }
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
-
-async function getLlmResponse(board) {
-  const response = await fetch('http://localhost:8080/api/llmresponse', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(board),
-  });
-
-  if (!response.ok) {
-    throw new Error('HTTP error! status: ${response.status}');
-  }
-
-  const index = await response.json();
-  return index;
-}
-
 

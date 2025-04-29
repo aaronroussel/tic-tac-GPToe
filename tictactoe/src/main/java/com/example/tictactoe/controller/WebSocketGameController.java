@@ -36,11 +36,22 @@ public class WebSocketGameController extends TextWebSocketHandler {
     PlayerMove move = mapper.readValue(message.getPayload(), PlayerMove.class);
 
     GameState game = gameService.getGame(move.getGameId());
+
+    if(game == null) return;
+
+    if (!move.getPlayerId().equals(game.getCurrentTurnPlayerId())) {
+      session.sendMessage(new TextMessage("{\"error\":\"Not your turn!\"}"));
+      return;
+    }
         
-    if (game != null && updateGameBoard(game, move)) {
+    if (updateGameBoard(game, move)) {
+      game.switchTurn();
+
       String gameUpdate = mapper.writeValueAsString(game);
       game.getPlayer1().getSession().sendMessage(new TextMessage(gameUpdate));
-      game.getPlayer2().getSession().sendMessage(new TextMessage(gameUpdate));
+      game.getPlayer1().getSession().sendMessage(new TextMessage(gameUpdate));
+    } else {
+      session.sendMessage(new TextMessage("{\"error\":\"Invalid Move!\"}"));
     }
   }
 
